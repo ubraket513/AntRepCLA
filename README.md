@@ -257,8 +257,25 @@ Three things were deliberately **not** adopted:
   or igraph would be a large dependency to accelerate a twentieth of it.
 - **A plotting library.** Matplot++ requires CMake to build and a Gnuplot
   installation at runtime — exactly the kind of dependency this code exists to
-  avoid. The figures are bar charts and SVG is text, so `src/svg.cpp` writes them
-  directly.
+  avoid. R and Julia are heavier still: a whole second language runtime, and a
+  package manager with it, to draw two bar charts. The figures are bar charts
+  and SVG is text, so `src/svg.cpp` writes them directly, inside the same 0.03 s
+  run and with nothing to install.
+
+### Optional: figures through R
+
+The pipeline emits its data as TSV, so anything can plot it. `tools/plot.R`
+does, and adds a rank-abundance figure the binary does not produce:
+
+```bash
+make plot-r        # or: Rscript tools/plot.R out out
+```
+
+This is the one target in the build that can fail for want of a tool, and it is
+deliberately not a dependency of `run` or `check` — the binary's own SVG output
+never needs R. The script uses ggplot2 when it is installed and base graphics
+otherwise, so it works against a bare `r-base-core` with no `install.packages()`
+step.
 
 ### Editor setup
 

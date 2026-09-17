@@ -73,8 +73,17 @@ bottleneck; parsing is. Anyone chasing this further should start there.
 - **No graph library.** Union-find is 4.9% of the run; Boost.Graph or igraph
   would be a large dependency to speed up a twentieth of it.
 - **No plotting library.** Matplot++ needs CMake to build and **Gnuplot at
-  runtime**, which is the dependency class this port exists to remove.
-  `src/svg.cpp` writes the bar charts directly.
+  runtime**, which is the dependency class this port exists to remove. R and
+  Julia were considered and rejected for the same reason, more so: a second
+  language runtime plus its package manager, to draw two bar charts. Julia is
+  not even in apt here, and its time-to-first-plot would exceed the entire
+  analysis. `src/svg.cpp` writes the charts directly.
+- **R is nevertheless available as an opt-in.** `tools/plot.R` + `make plot-r`
+  read the TSV output and add a rank-abundance figure the binary does not
+  produce. It is not a dependency of `run` or `check`. R 4.5.2 *is* installed on
+  this machine (an earlier check in-session wrongly reported otherwise);
+  ggplot2 is not, so the script's base-graphics fallback is the path that
+  actually runs here, and it was tested.
 - **No precompiled header.** Tried for `csv.hpp` and measured *worse*: a 187 MB
   `.gch` that costs more to load (8.3 s) than reparsing the header (7.3 s), plus
   a 5.9 s generation step that serialises the build. Clean build went 11.8 s ->

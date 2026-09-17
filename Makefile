@@ -6,6 +6,7 @@
 #   make check      unit tests + byte-for-byte check against the frozen results
 #   make run        analyse the bundled dataset, writing every output
 #   make igblast    FASTA -> AIRR TSV, the step before the analysis
+#   make plot-r     optional: extra figures via R, if you have it installed
 #
 # Builds use every core by default; override with `make -j1` or `NPROC=2 make`.
 
@@ -30,7 +31,7 @@ TEST_OBJECTS = $(BUILD)/tests/test_main.o $(BUILD)/tests/doctest_main.o
 IGBLAST_TSV ?= data/igblast_results.tsv
 OUT         ?= out
 
-.PHONY: all test check run igblast compile-commands clean help
+.PHONY: all test check run igblast plot-r compile-commands clean help
 all: $(BINARY)
 
 $(BINARY): $(LIB_OBJECTS) $(BUILD)/src/main.o
@@ -66,6 +67,15 @@ run: $(BINARY)
 		--usage-plot $(OUT)/v_gene_usage.svg \
 		--stats-plot $(OUT)/lineage_stats.svg
 	@echo "outputs in $(OUT)/"
+
+# Optional extra figures through R. Deliberately not a dependency of `run` or
+# `check`: the binary's own SVG output never needs R, and this target is the
+# only thing in the build that can fail for want of a tool.
+plot-r:
+	@command -v Rscript >/dev/null 2>&1 || { \
+		echo "Rscript not found. This target is optional -- 'make run' already"; \
+		echo "wrote $(OUT)/*.svg without it."; exit 1; }
+	@Rscript tools/plot.R $(OUT) $(OUT)
 
 # FASTA -> AIRR TSV. QUERY is required; OUT_TSV defaults to the analysis input.
 igblast:

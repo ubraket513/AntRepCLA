@@ -45,18 +45,24 @@ std::string open_svg(double width, double height, const std::string& title) {
     out += "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + number(width) +
            "\" height=\"" + number(height) + "\" viewBox=\"0 0 " + number(width) + " " +
            number(height) + "\" font-family=\"DejaVu Sans, Helvetica, Arial, sans-serif\">\n";
+    // Styling follows the figures this replaces: navy bold title, black bold
+    // axis labels, green category ticks and blue value ticks, dashed grid
+    // behind the bars.
     out += "<style>\n"
            "  .bg { fill: #ffffff; }\n"
-           "  .title { font-size: 17px; font-weight: bold; fill: #1a1a1a; }\n"
-           "  .axis-label { font-size: 13px; font-weight: bold; fill: #1a1a1a; }\n"
-           "  .tick { font-size: 10px; fill: #333333; }\n"
-           "  .value { font-size: 11px; fill: #1a1a1a; }\n"
-           "  .grid { stroke: #b0b0b0; stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.7; }\n"
-           "  .axis { stroke: #1a1a1a; stroke-width: 1.2; }\n"
+           "  .title { font-size: 19px; font-weight: bold; fill: #141482; "
+           "letter-spacing: 0.2px; }\n"
+           "  .axis-label { font-size: 15px; font-weight: bold; fill: #111111; }\n"
+           "  .tick-cat { font-size: 11px; font-weight: bold; fill: #2f7d32; }\n"
+           "  .tick-val { font-size: 12px; font-weight: bold; fill: #14579e; }\n"
+           "  .value { font-size: 12px; font-weight: bold; fill: #111111; }\n"
+           "  .grid { stroke: #c4c4c4; stroke-width: 1; stroke-dasharray: 5 4; }\n"
+           "  .spine { stroke: #111111; stroke-width: 1.6; fill: none; }\n"
+           "  .bar { stroke: #2b2b2b; stroke-width: 0.6; }\n"
            "</style>\n";
     out += "<rect class=\"bg\" width=\"100%\" height=\"100%\"/>\n";
     out += "<text class=\"title\" x=\"" + number(width / 2) +
-           "\" y=\"28\" text-anchor=\"middle\">" + escape_xml(title) + "</text>\n";
+           "\" y=\"32\" text-anchor=\"middle\">" + escape_xml(title) + "</text>\n";
     return out;
 }
 
@@ -119,10 +125,10 @@ std::string render_vertical_bars(const std::string& title,
 
     // Width follows the series so labels never overlap, however many genes
     // there are.
-    const double left = 80, right = 30, top = 50, bottom = 130;
-    const double bar_slot = std::max(18.0, 900.0 / static_cast<double>(ordered.size()));
+    const double left = 100, right = 40, top = 62, bottom = 165;
+    const double bar_slot = std::max(22.0, 1100.0 / static_cast<double>(ordered.size()));
     const double plot_width = bar_slot * static_cast<double>(ordered.size());
-    const double plot_height = 420;
+    const double plot_height = 520;
     const double width = left + plot_width + right;
     const double height = top + plot_height + bottom;
 
@@ -135,7 +141,7 @@ std::string render_vertical_bars(const std::string& title,
         const double y = top + plot_height - (value / bound) * plot_height;
         out += "<line class=\"grid\" x1=\"" + number(left) + "\" y1=\"" + number(y) +
                "\" x2=\"" + number(left + plot_width) + "\" y2=\"" + number(y) + "\"/>\n";
-        out += "<text class=\"tick\" x=\"" + number(left - 8) + "\" y=\"" + number(y + 4) +
+        out += "<text class=\"tick-val\" x=\"" + number(left - 10) + "\" y=\"" + number(y + 4) +
                "\" text-anchor=\"end\">" + integer_text(value) + "</text>\n";
     }
 
@@ -153,17 +159,18 @@ std::string render_vertical_bars(const std::string& title,
 
         const double label_x = x + bar_slot * 0.35;
         const double label_y = top + plot_height + 10;
-        out += "<text class=\"tick\" x=\"" + number(label_x) + "\" y=\"" + number(label_y) +
+        out += "<text class=\"tick-cat\" x=\"" + number(label_x) + "\" y=\"" + number(label_y) +
                "\" text-anchor=\"end\" transform=\"rotate(-90 " + number(label_x) + " " +
                number(label_y) + ")\">" + escape_xml(ordered[i].label) + "</text>\n";
     }
 
-    out += "<line class=\"axis\" x1=\"" + number(left) + "\" y1=\"" + number(top + plot_height) +
-           "\" x2=\"" + number(left + plot_width) + "\" y2=\"" + number(top + plot_height) + "\"/>\n";
+    // Framed plot area, drawn last so it sits over the bars' edges.
+    out += "<rect class=\"spine\" x=\"" + number(left) + "\" y=\"" + number(top) +
+           "\" width=\"" + number(plot_width) + "\" height=\"" + number(plot_height) + "\"/>\n";
     out += "<text class=\"axis-label\" x=\"" + number(left + plot_width / 2) + "\" y=\"" +
-           number(height - 12) + "\" text-anchor=\"middle\">" + escape_xml(x_label) + "</text>\n";
-    out += "<text class=\"axis-label\" x=\"18\" y=\"" + number(top + plot_height / 2) +
-           "\" text-anchor=\"middle\" transform=\"rotate(-90 18 " +
+           number(height - 16) + "\" text-anchor=\"middle\">" + escape_xml(x_label) + "</text>\n";
+    out += "<text class=\"axis-label\" x=\"26\" y=\"" + number(top + plot_height / 2) +
+           "\" text-anchor=\"middle\" transform=\"rotate(-90 26 " +
            number(top + plot_height / 2) + ")\">" + escape_xml(y_label) + "</text>\n";
     out += "</svg>\n";
     return out;
@@ -174,11 +181,17 @@ std::string render_horizontal_bars(const std::string& title,
                                    const std::vector<Bar>& bars) {
     require_non_empty(bars);
 
-    // Metric names are long, so the left margin is generous and the labels sit
-    // outside the plot rather than on top of the bars.
-    const double left = 380, right = 90, top = 50, bottom = 60;
-    const double row = 44;
-    const double plot_width = 520;
+    // Metric names are long and their length is not known in advance, so the
+    // left margin follows the widest label rather than being a fixed guess
+    // that the next metric name overflows. Measured against the rendered
+    // output, the bold 11px face averages ~6.7 px per character; the constant
+    // is the gutter that keeps the longest label clear of the edge.
+    std::size_t widest = 0;
+    for (const Bar& bar : bars) widest = std::max(widest, bar.label.size());
+    const double left = std::max(320.0, static_cast<double>(widest) * 6.9 + 44.0);
+    const double right = 100, top = 62, bottom = 72;
+    const double row = 48;
+    const double plot_width = 560;
     const double plot_height = row * static_cast<double>(bars.size());
     const double width = left + plot_width + right;
     const double height = top + plot_height + bottom;
@@ -191,8 +204,8 @@ std::string render_horizontal_bars(const std::string& title,
         const double x = left + (value / bound) * plot_width;
         out += "<line class=\"grid\" x1=\"" + number(x) + "\" y1=\"" + number(top) +
                "\" x2=\"" + number(x) + "\" y2=\"" + number(top + plot_height) + "\"/>\n";
-        out += "<text class=\"tick\" x=\"" + number(x) + "\" y=\"" +
-               number(top + plot_height + 18) + "\" text-anchor=\"middle\">" +
+        out += "<text class=\"tick-val\" x=\"" + number(x) + "\" y=\"" +
+               number(top + plot_height + 20) + "\" text-anchor=\"middle\">" +
                integer_text(value) + "</text>\n";
     }
 
@@ -206,15 +219,15 @@ std::string render_horizontal_bars(const std::string& title,
         out += "<rect class=\"bar\" x=\"" + number(left) + "\" y=\"" + number(y) +
                "\" width=\"" + number(bar_width) + "\" height=\"" + number(row * 0.64) +
                "\" fill=\"" + viridis(fraction) + "\"/>\n";
-        out += "<text class=\"tick\" x=\"" + number(left - 10) + "\" y=\"" +
+        out += "<text class=\"tick-cat\" x=\"" + number(left - 12) + "\" y=\"" +
                number(y + row * 0.45) + "\" text-anchor=\"end\">" +
                escape_xml(bars[i].label) + "</text>\n";
         out += "<text class=\"value\" x=\"" + number(left + bar_width + 8) + "\" y=\"" +
                number(y + row * 0.45) + "\">" + integer_text(bars[i].value) + "</text>\n";
     }
 
-    out += "<line class=\"axis\" x1=\"" + number(left) + "\" y1=\"" + number(top) +
-           "\" x2=\"" + number(left) + "\" y2=\"" + number(top + plot_height) + "\"/>\n";
+    out += "<rect class=\"spine\" x=\"" + number(left) + "\" y=\"" + number(top) +
+           "\" width=\"" + number(plot_width) + "\" height=\"" + number(plot_height) + "\"/>\n";
     out += "<text class=\"axis-label\" x=\"" + number(left + plot_width / 2) + "\" y=\"" +
            number(height - 14) + "\" text-anchor=\"middle\">" + escape_xml(x_label) + "</text>\n";
     out += "</svg>\n";
