@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push supersedes an in-flight run on the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-verify:
+    name: Build, test and verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain versions
+        run: |
+          g++ --version
+          make --version | head -1
+          echo "cores: $(nproc)"
+
+      # No dependency installation step: every library is a vendored header
+      # under third_party/, so a bare ubuntu image with g++ is enough.
+      - name: Build
+        run: make
+
+      - name: Unit tests
+        run: make test
+
+      # Separate from the unit tests on purpose. A unit-test failure means a
+      # component broke; a verify failure means the pipeline's scientific
+      # output changed, which is a far more serious signal and should be
+      # readable as such in the CI log.
+      - name: Verify output against the frozen reference
+        run: make verify
+
+      - name: Rebuild from clean
+        run: make clean && make
+
+      - name: End-to-end run
+        run: |
+          make run
+          test -s out/lineages.tsv
+          test -s out/v_gene_usage.tsv
+          test -s out/weblogo_query.txt
+          test -s out/v_gene_usage.svg
+          test -s out/lineage_stats.svg
+
+      - name: Upload outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-output
+          path: out/
+          retention-days: 14

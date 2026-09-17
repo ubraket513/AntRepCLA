@@ -1,4 +1,10 @@
 build/
 compile_commands.json
 out/
-.serena/cache/
+
+# Windows alternate-data-stream artifacts, created when files are downloaded on
+# Windows and unpacked under WSL. 320 of these were once committed by accident.
+*:Zone.Identifier
+
+# Serena language-server config and agent state: local tooling, not shared.
+.serena/

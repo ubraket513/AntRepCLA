@@ -26,7 +26,28 @@ make run        # analyse the bundled dataset, writing every output to out/
 
 The only requirements are `g++` with C++20 and OpenMP, and `make`. There is
 nothing to install, no virtualenv, no package manager, and no network access
-needed: every dependency is a vendored header under `third_party/`.
+needed: every dependency is a vendored header under `third_party/`. A clean
+build takes about nine seconds.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `make` | Build `build/antibody-repertoire`. Parallel by default. |
+| `make test` | 36 unit tests, including the brute-force comparison. |
+| `make verify` | Check the output byte-for-byte against `tests/golden/`. |
+| `make check` | `test` + `verify`. This is the gate that matters. |
+| `make run` | Analyse `data/igblast_results.tsv` into `out/`. |
+| `make igblast QUERY=reads.fasta` | FASTA → AIRR TSV, the step before the analysis. |
+| `make plot-r` | *Optional.* Extra figures via R, if installed. |
+| `make format` | *Optional.* Apply `.clang-format`, if installed. |
+| `make compile-commands` | Write `compile_commands.json` for clangd. |
+| `make clean` | Remove `build/` and `compile_commands.json`. |
+| `make help` | Print the target list. |
+
+Useful variables: `NPROC=2 make` limits build and runtime parallelism,
+`OUT=somewhere make run` changes the output directory, and
+`IGBLAST_TSV=other.tsv make run` changes the input.
 
 ## The two steps
 
@@ -49,6 +70,11 @@ build/antibody-repertoire --igblast data/igblast_results.tsv \
     --stats-plot    out/lineage_stats.svg \
     --workers 8
 ```
+
+`--help` lists every flag. `--threshold` sets the Hamming cutoff as a fraction
+of CDR3 length (default `0.1`), `--min-lineage-size` the "well represented"
+cutoff (default `10`), and `--workers` the thread count (default: chosen from
+the size of the job).
 
 The five summary statistics go to **stdout**; logs go to **stderr**. That split is
 deliberate — `... > stats.txt` produces a file that diffs directly against the
@@ -213,10 +239,27 @@ parsing, 18% collapsing reads to unique CDR3s, 25% the Hamming scan and 9%
 union-find — about three quarters serial. The scan, the original bottleneck, no
 longer is.
 
+### Continuous integration
+
+`.github/workflows/ci.yml` builds, runs the unit tests, verifies the output
+against the frozen reference, rebuilds from clean and performs an end-to-end
+run, uploading `out/` as an artifact. There is no dependency-installation step
+— a bare Ubuntu image with `g++` is enough.
+
+`verify` is a separate CI step from `test` on purpose: a unit-test failure means
+a component broke, while a verify failure means the pipeline's scientific output
+changed, which is a much more serious signal and should read as such in the log.
+
+Formatting is **not** gated. `.clang-format` is provided for editors and
+`make format`, but the code predates it and has not been normalised against it,
+so enforcing it would fail for reasons unrelated to any change.
+
 ### Layout
 
 ```
 Makefile              build, test, run
+.github/workflows/    continuous integration
+docs/DECISIONS.md     why the code is shaped the way it is
 src/                  the analysis
   igblast.*             AIRR TSV loading and normalisation
   hamming.*             blocking, pigeonhole filter, parallel scan, oracle
@@ -229,10 +272,15 @@ tests/
   golden/               frozen reference output — the port's contract
   data/                 the tie-heavy fixture
 third_party/          vendored headers, committed on purpose
-tools/                run_igblast.sh, verify_output.sh
+tools/                run_igblast.sh, verify_output.sh, plot.R
 report/               the write-up this README summarises
-ncbi-igblast-1.22.0/  IgBLAST binaries and germline databases
+data/                 the repertoire, and the IMGT germline reference
+ncbi-igblast-1.22.0/  IgBLAST binaries and germline databases (vendored as released)
 ```
+
+`data/` and `ncbi-igblast-1.22.0/` are marked `linguist-vendored` and
+`linguist-generated` in `.gitattributes`, so GitHub's language statistics
+describe the code actually written here rather than the bundled release.
 
 ### Dependencies, and why there are so few
 
@@ -276,6 +324,16 @@ deliberately not a dependency of `run` or `check` — the binary's own SVG outpu
 never needs R. The script uses ggplot2 when it is installed and base graphics
 otherwise, so it works against a bare `r-base-core` with no `install.packages()`
 step.
+
+### Licence
+
+The code in `src/`, `tests/` and `tools/` is MIT licensed — see `LICENSE`.
+
+Two bundled trees carry their own terms and are **not** covered by it:
+`ncbi-igblast-1.22.0/` is redistributed as NCBI released it, under NCBI's
+licence, and `third_party/` holds vendored headers under their own licences
+(csv-parser, unordered_dense and doctest are each MIT). `data/` contains IMGT
+reference sequences, which are subject to IMGT's terms of use.
 
 ### Editor setup
 

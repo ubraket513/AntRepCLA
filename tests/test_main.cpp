@@ -1,4 +1,4 @@
-// Unit tests mirroring the Python reference suite.
+// Unit tests, carried over from the Python suite this replaced.
 //
 // These cover the pieces in isolation. Whole-pipeline equivalence is proved
 // separately, by diffing this binary's output against the frozen golden files

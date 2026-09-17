@@ -1,0 +1,25 @@
+# Normalise line endings; this repository has been touched from Windows.
+* text=auto eol=lf
+
+# Binary and data payloads: never diffed, never merged textually.
+*.fasta       -diff
+*.tsv         -diff
+*.png binary
+*.pdf binary
+*.ndb binary
+*.nhr binary
+*.nin binary
+*.nog binary
+*.nos binary
+*.not binary
+*.nsq binary
+*.ntf binary
+*.nto binary
+
+# Keep GitHub's language statistics about the code we actually wrote. Without
+# this the repository reports as C/Perl/Python from the bundled IgBLAST release
+# and the vendored headers.
+ncbi-igblast-1.22.0/** linguist-vendored
+third_party/**        linguist-vendored
+data/**               linguist-generated
+report/**             linguist-documentation

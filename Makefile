@@ -7,6 +7,7 @@
 #   make run        analyse the bundled dataset, writing every output
 #   make igblast    FASTA -> AIRR TSV, the step before the analysis
 #   make plot-r     optional: extra figures via R, if you have it installed
+#   make format     optional: apply .clang-format to src/ and tests/
 #
 # Builds use every core by default; override with `make -j1` or `NPROC=2 make`.
 
@@ -31,7 +32,7 @@ TEST_OBJECTS = $(BUILD)/tests/test_main.o $(BUILD)/tests/doctest_main.o
 IGBLAST_TSV ?= data/igblast_results.tsv
 OUT         ?= out
 
-.PHONY: all test check run igblast plot-r compile-commands clean help
+.PHONY: all test check verify run igblast plot-r format compile-commands clean help
 all: $(BINARY)
 
 $(BINARY): $(LIB_OBJECTS) $(BUILD)/src/main.o
@@ -55,7 +56,11 @@ test: $(TESTS)
 	@./$(TESTS)
 
 # Unit tests, then the frozen-output check. This is the gate that matters.
-check: test $(BINARY)
+check: test verify
+
+# Split out from `check` so CI reports the two failure modes separately: a
+# broken unit test and a changed pipeline result mean different things.
+verify: $(BINARY)
 	@./tools/verify_output.sh
 
 run: $(BINARY)
@@ -80,6 +85,15 @@ plot-r:
 # FASTA -> AIRR TSV. QUERY is required; OUT_TSV defaults to the analysis input.
 igblast:
 	@./tools/run_igblast.sh $(QUERY) $(if $(OUT_TSV),$(OUT_TSV),$(IGBLAST_TSV)) $(NPROC)
+
+# Formatting is not enforced by CI: .clang-format is provided for editors and
+# for this target, but the codebase predates it and has not been normalised
+# against it, so gating on it would fail for reasons unrelated to any change.
+format:
+	@command -v clang-format >/dev/null 2>&1 || { \
+		echo "clang-format not found; .clang-format is still used by editors."; exit 1; }
+	@clang-format -i src/*.cpp src/*.hpp tests/*.cpp
+	@echo "formatted src/ and tests/"
 
 # clangd needs the include paths and the standard, which a Makefile does not
 # publish. Generated here rather than requiring `bear`.

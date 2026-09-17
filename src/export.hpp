@@ -1,10 +1,13 @@
 // Portable text dumps of the pipeline's results.
 //
-// These formats are a contract shared with the Python reference pipeline:
-// tab-separated, sorted, ASCII, trailing newline, so the two implementations
-// can be diffed byte for byte. The five summary statistics are too coarse to
-// validate a port on their own -- two different lineage partitions can produce
-// identical counts -- so the lineage table is what actually proves equivalence.
+// These formats are a contract, inherited from the Python implementation this
+// replaced: tab-separated, sorted, ASCII, trailing newline, so the output can
+// be diffed byte for byte against the frozen results in tests/golden/. The
+// five summary statistics are too coarse to prove equivalence on their own --
+// two different lineage partitions can produce identical counts -- so the
+// lineage table is what actually does it. Changing any of this changes the
+// contract, and there is no longer a second implementation to re-derive the
+// golden files from.
 #pragma once
 
 #include <string>
