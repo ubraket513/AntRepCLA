@@ -86,3 +86,32 @@
 2024-11-27T18:14:22.550299-0500 Displaying the plot interactively.
 2024-11-27T18:46:57.172943-0500 Plotting completed successfully.
 2024-11-27T18:46:57.197352-0500 Extracting amino acid sequences from the largest clonal lineage.
+2026-09-17T14:11:55.719089+0900 Starting IgBLAST preprocessing.
+2026-09-17T14:11:55.730484+0900 Loading file: data/igblast_results.tsv
+2026-09-17T14:11:55.893980+0900 Normalizing gene calls by removing alleles.
+2026-09-17T14:11:55.911418+0900 Computing CDR3 region lengths.
+2026-09-17T14:11:55.913017+0900 Converting comma-separated gene calls into sets.
+2026-09-17T14:11:55.945371+0900 Preprocessing completed successfully.
+2026-09-17T14:11:55.945926+0900 Initializing Hamming graph computation...
+2026-09-17T14:11:56.217801+0900 Compared 33,151 candidate pairs (2,477 unique CDR3s from 10,000 sequences).
+2026-09-17T14:11:56.218935+0900 Graph has 2,477 nodes and 11,294 edges.
+2026-09-17T14:11:56.225391+0900 Hamming graph successfully saved to cache.
+2026-09-17T14:11:56.226529+0900 Hamming graph computation completed.
+2026-09-17T14:11:56.226807+0900 Extracting clonal lineages from the Hamming graph.
+2026-09-17T14:11:56.230103+0900 Identified 623 clonal lineages.
+2026-09-17T14:11:56.230342+0900 Starting computation of clonal lineage statistics.
+2026-09-17T14:11:56.230611+0900 Assigning clonal lineages to sequences in the IgBLAST result.
+2026-09-17T14:11:57.994834+0900 Grouping sequences by clonal lineage and filtering lineages with at least 10 sequences.
+2026-09-17T14:11:58.000124+0900 Completed computation of clonal lineage statistics.
+2026-09-17T14:11:58.273259+0900 Plot saved to file: plots/clonal_lineage_stats.png
+2026-09-17T14:11:58.274060+0900 Computing usage statistics for V genes.
+2026-09-17T14:11:58.274301+0900 Mapping nodes to their respective clonal lineages.
+2026-09-17T14:11:58.281151+0900 Counting V gene usage.
+2026-09-17T14:11:58.288723+0900 Caching usage statistics.
+2026-09-17T14:11:58.289410+0900 Cached usage statistics.
+2026-09-17T14:11:58.289813+0900 Starting to plot usage statistics.
+2026-09-17T14:11:58.668230+0900 No display available; skipping interactive show.
+2026-09-17T14:11:59.143430+0900 Plot saved to file: plots/usage_plot.png
+2026-09-17T14:11:59.143930+0900 Plotting completed successfully.
+2026-09-17T14:11:59.144237+0900 Extracting amino acid sequences from the largest clonal lineage.
+2026-09-17T14:11:59.149136+0900 Amino acid sequences saved to weblogo_query.txt in the data directory.

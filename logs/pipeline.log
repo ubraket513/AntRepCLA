@@ -1,0 +1,12 @@
+2026-09-17 14:25:01 | INFO     | antibody_repertoire.io.igblast:load_igblast_results:35 - Loading IgBLAST results from data/igblast_results.tsv
+2026-09-17 14:25:01 | INFO     | antibody_repertoire.io.igblast:load_igblast_results:51 - Loaded 10,000 sequences (2,477 unique CDR3s).
+2026-09-17 14:25:02 | INFO     | antibody_repertoire.graph.hamming:build_hamming_graph:110 - Hamming graph: 2,477 nodes, 11,294 edges, 33,151 candidate pairs compared.
+2026-09-17 14:25:02 | INFO     | antibody_repertoire.io.cache:save_cache:38 - Saved cache to /home/dzk55/bioinformatics/antibody_repertoire/cache/HammingGraph.pkl
+2026-09-17 14:25:02 | INFO     | antibody_repertoire.analysis.lineage:get_clonal_lineages:14 - Identified 623 clonal lineages.
+2026-09-17 14:25:02 | INFO     | antibody_repertoire.analysis.lineage:get_lineage_stats:79 - Computed clonal lineage statistics.
+2026-09-17 14:25:02 | INFO     | antibody_repertoire.analysis.lineage:get_v_gene_usage:105 - Computed usage across 52 V genes.
+2026-09-17 14:25:02 | INFO     | antibody_repertoire.analysis.lineage:get_cdr3_aa_from_largest_lineage:140 - Extracted 501 CDR3 amino acid sequences.
+2026-09-17 14:25:02 | INFO     | antibody_repertoire.io.cache:save_cache:38 - Saved cache to /home/dzk55/bioinformatics/antibody_repertoire/cache/UsageCounts.pkl
+2026-09-17 14:25:02 | SUCCESS  | antibody_repertoire.pipeline:run_analysis:68 - Analysis complete.
+2026-09-17 14:25:02 | INFO     | antibody_repertoire.viz.plots:_finish:23 - Plot saved to /home/dzk55/bioinformatics/antibody_repertoire/plots/clonal_lineage_stats.png
+2026-09-17 14:25:03 | INFO     | antibody_repertoire.viz.plots:_finish:23 - Plot saved to /home/dzk55/bioinformatics/antibody_repertoire/plots/usage_plot.png
