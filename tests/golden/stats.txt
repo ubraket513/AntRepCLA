@@ -1,0 +1,5 @@
+     623  number of clonal lineages
+     103  number of unique CDR3s in the largest clonal lineage
+     501  number of sequences in the largest clonal lineage
+      37  number of lineages represented by at least 10 unique CDR3s
+     272  number of lineages represented by at least 10 sequences
